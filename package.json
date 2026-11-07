@@ -19,6 +19,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.16.6",
     "@tailwindcss/turbopack": "^4",
     "@types/archiver": "^8.0.0",
     "@types/mailparser": "^3.9.0",

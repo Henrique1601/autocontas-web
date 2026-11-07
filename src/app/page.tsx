@@ -15,8 +15,21 @@ import {
   AlertCircle,
   CheckCircle2,
   Mail,
-  Filter
+  Filter,
+  TrendingUp,
+  BarChart3,
+  Database
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend
+} from 'recharts';
 import { BillItem } from '@/types/bill';
 
 export default function Home() {
@@ -25,6 +38,7 @@ export default function Home() {
   const [syncing, setSyncing] = useState<boolean>(false);
   const [selectedProvider, setSelectedProvider] = useState<string>('ALL');
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
+  const [showCharts, setShowCharts] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Modal de Configuração de E-mail
@@ -156,6 +170,21 @@ export default function Home() {
 
   const monthsList = Array.from(new Set(bills.map((b) => b.referenceMonth))).filter(Boolean);
 
+  // Agrupamento para o Gráfico Mensal de Despesas
+  const chartData = monthsList.map((month) => {
+    const monthBills = bills.filter((b) => b.referenceMonth === month);
+    const cpflVal = monthBills.filter((b) => b.provider === 'CPFL').reduce((sum, b) => sum + (b.amount || 0), 0);
+    const sabespVal = monthBills.filter((b) => b.provider === 'SABESP').reduce((sum, b) => sum + (b.amount || 0), 0);
+    const vivoVal = monthBills.filter((b) => b.provider === 'VIVO').reduce((sum, b) => sum + (b.amount || 0), 0);
+    return {
+      month,
+      CPFL: cpflVal,
+      Sabesp: sabespVal,
+      Vivo: vivoVal,
+      total: cpflVal + sabespVal + vivoVal,
+    };
+  });
+
   const getProviderBadge = (provider: string) => {
     switch (provider) {
       case 'CPFL':
@@ -202,6 +231,18 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowCharts(!showCharts)}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer border ${
+              showCharts 
+                ? 'bg-blue-600/10 text-blue-400 border-blue-500/30' 
+                : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            {showCharts ? 'Ocultar Gráficos' : 'Ver Gráficos'}
+          </button>
+
           <button
             onClick={() => setShowConfigModal(true)}
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition cursor-pointer"
@@ -295,6 +336,35 @@ export default function Home() {
             <p className="text-xs text-zinc-500 mt-1">Faturas salvas</p>
           </div>
         </div>
+
+        {/* Gráfico de Evolução de Gastos */}
+        {showCharts && chartData.length > 0 && (
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                Histórico de Gastos por Mês (CPFL, Sabesp, Vivo)
+              </h2>
+            </div>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                  <XAxis dataKey="month" stroke="#71717a" fontSize={12} />
+                  <YAxis stroke="#71717a" fontSize={12} tickFormatter={(val) => `R$${val}`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '0.75rem', color: '#fff' }}
+                    formatter={(val: any) => [`R$ ${Number(val).toFixed(2)}`, '']}
+                  />
+                  <Legend />
+                  <Bar dataKey="CPFL" name="CPFL (Luz)" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Sabesp" name="Sabesp (Água)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Vivo" name="Vivo (Internet)" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Toolbar & Filters */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-900/60 border border-zinc-800 p-4 rounded-2xl">

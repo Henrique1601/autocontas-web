@@ -5,7 +5,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { BillItem } from '@/types/bill';
 import { detectProvider, extractAmount, extractDueDate, extractReferenceMonth } from './parser';
-import { getBillsStorageDir, saveBills } from './db';
+import { getBillsStorageDir, saveBillsAsync } from './db';
 
 export interface ImapConfig {
   host: string;
@@ -117,7 +117,7 @@ export async function syncBillsFromImap(config: ImapConfig): Promise<{ newBills:
     await client.logout();
 
     if (downloadedBills.length > 0) {
-      saveBills(downloadedBills);
+      await saveBillsAsync(downloadedBills);
     }
 
     return {

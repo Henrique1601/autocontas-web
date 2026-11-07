@@ -9,13 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "archiver": "^8.0.0",
+    "imapflow": "^2.10.2",
+    "lucide-react": "^1.69.0",
+    "mailparser": "^3.14.2",
     "next": "16.4.5",
+    "pdf-parse": "^2.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@types/archiver": "^8.0.0",
+    "@types/mailparser": "^3.9.0",
     "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Dados e faturas locais (segurança e privacidade de dados)
+/data/bills/*
+!/data/bills/.gitkeep
+/data/bills.json
